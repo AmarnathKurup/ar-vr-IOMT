@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Live Patient Monitor</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            background: #111;
+            color: white;
+        }
+        .card {
+            margin: 20px auto;
+            padding: 20px;
+            width: 300px;
+            border-radius: 10px;
+            background: #222;
+        }
+        .normal { color: lime; }
+        .alert { color: red; }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>🏥 Live Patient Monitor</h1>
+
+<div class="card">
+    <h2 id="status">Status: --</h2>
+    <p>❤️ Heart Rate: <span id="hr">--</span></p>
+    <p>🫁 SpO₂: <span id="spo2">--</span></p>
+    <p>🌡️ Temp: <span id="temp">--</span></p>
+    <p>⏱️ Time: <span id="time">--</span></p>
+</div>
+
+<button onclick="start()">Start</button>
+<button onclick="stop()">Stop</button>
+
+<script>
+let interval = null;
+
+function fetchData() {
+    fetch("http://127.0.0.1:5000/api/v1/combined/latest")
+    .then(res => res.json())
+    .then(data => {
+        if (!data || Object.keys(data).length === 0) return;
+
+        document.getElementById("hr").innerText = data.heart_rate;
+        document.getElementById("spo2").innerText = data.spo2;
+        document.getElementById("temp").innerText = data.temperature;
+        document.getElementById("time").innerText = data.timestamp;
+
+        let statusText = "NORMAL";
+        let statusClass = "normal";
+
+        if (data.heart_rate > 120 || data.spo2 < 90) {
+            statusText = "CRITICAL";
+            statusClass = "alert";
+        }
+
+        let statusEl = document.getElementById("status");
+        statusEl.innerText = "Status: " + statusText;
+        statusEl.className = statusClass;
+    });
+}
+
+
+
+
+
+function start() {
+    if (!interval) {
+        fetchData();
+        interval = setInterval(fetchData, 2000);
+    }
+}
+
+function stop() {
+    clearInterval(interval);
+    interval = null;
+}
+</script>
+
+</body>
+</html>

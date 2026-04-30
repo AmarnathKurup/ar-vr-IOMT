@@ -1,0 +1,81 @@
+  {
+    "_comment": "Body Temperature config.",
+
+    "sensor": {
+      "name": "BodyTemperature",
+      "sensor_id": "device001",
+      "type": "thermistor_NTC",
+      "protocol": "MQTT",
+      "topic": "Temperature",
+      "sampling_rate_hz": 1,
+
+      "unit": {
+        "primary": "°C"
+      },
+
+      "data_format": "float",
+      "precision_digits": 1
+    },
+
+    "conditions": {
+      "normal": {
+        "label": "Normal",
+        "description": "Healthy adult body temperature",
+        "range": [36.1, 37.2],
+        "alert_level": "none"
+      },
+
+      "low_grade_fever": {
+        "label": "Low-grade Fever",
+        "description": "Early infection response",
+        "range": [37.3, 37.9],
+        "alert_level": "low"
+      },
+
+      "fever": {
+        "label": "Fever",
+        "description": "Clinically significant fever",
+        "range": [38.0, 39.0],
+        "alert_level": "medium"
+      },
+
+      "high_fever": {
+        "label": "High Fever",
+        "description": "High fever requiring monitoring",
+        "range": [39.1, 40.5],
+        "alert_level": "high"
+      },
+
+      "hyperpyrexia": {
+        "label": "Hyperpyrexia",
+        "description": "Critical temperature (>40.5°C)",
+        "range": [40.6, 43.0],
+        "alert_level": "critical"
+      },
+
+      "hypothermia": {
+        "label": "Hypothermia",
+        "description": "Dangerously low body temperature",
+        "range": [20.0, 35.9],
+        "alert_level": "critical"
+      }
+    },
+
+    "drift_model": {
+      "thermal_drift": {
+        "description": "Gradual sensor heating or calibration drift",
+        "params": {
+          "rate_celsius_per_sample": 0.01,
+          "max_drift_celsius": 1.5
+        }
+      },
+
+      "spike_artifact": {
+        "description": "Sudden abnormal spike (sensor glitch)",
+        "params": {
+          "probability": 0.05,
+          "magnitude_celsius": [0.5, 2.0]
+        }
+      }
+    }
+  }

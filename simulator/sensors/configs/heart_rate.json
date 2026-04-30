@@ -1,0 +1,69 @@
+{
+  "_comment": "Heart Rate sensor config for DT-based IDS simulation.",
+  "sensor": {
+    "name": "HeartRate",
+    "sensor_id": "device001",
+    "type": "wearable_ECG_PPG",
+    "protocol": "MQTT",
+    "topic": "HR_Only",
+    "sampling_rate_hz": 1,
+    "unit": {
+      "primary": "bpm"
+    },
+    "data_format": "float"
+  },
+  "conditions": {
+    "normal": {
+      "label": "Normal",
+      "description": "Normal resting HR for adults",
+      "range": [60, 100],
+      "alert_level": "none"
+    },
+    "bradycardia_mild": {
+      "label": "Mild Bradycardia",
+      "description": "Mild bradycardia - sinus node dysfunction or high fitness",
+      "range": [50, 59],
+      "alert_level": "low"
+    },
+    "bradycardia_severe": {
+      "label": "Severe Bradycardia",
+      "description": "Severe bradycardia - syncope risk",
+      "range": [30, 49],
+      "alert_level": "critical"
+    },
+    "tachycardia_mild": {
+      "label": "Mild Tachycardia",
+      "description": "Mild tachycardia - stress/fever/early arrhythmia",
+      "range": [101, 130],
+      "alert_level": "low"
+    },
+    "tachycardia_severe": {
+      "label": "Severe Tachycardia",
+      "description": "Severe tachycardia - SVT/atrial flutter/sepsis",
+      "range": [131, 200],
+      "alert_level": "high"
+    },
+    "vfib_zone": {
+      "label": "VFib Zone",
+      "description": "VFib/extreme arrhythmia zone (ECG-sim only)",
+      "range": [200, 350],
+      "alert_level": "critical"
+    }
+  },
+  "drift_model": {
+    "motion_artifact": {
+      "description": "Motion artifact or ECG lead noise drift simulation",
+      "params": {
+        "probability": 0.1,
+        "drop_percent": [3, 8]
+      }
+    },
+    "baseline_wander": {
+      "description": "Slow baseline wander due to respiration or electrode shift",
+      "params": {
+        "frequency_hz": 0.25,
+        "amplitude_bpm": 3.0
+      }
+    }
+  }
+}

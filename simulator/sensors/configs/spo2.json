@@ -1,0 +1,64 @@
+{
+  "_comment": "SpO2 (Peripheral Oxygen Saturation) sensor config for DT-based IDS simulation.",
+  "sensor": {
+    "name": "SpO2",
+    "sensor_id": "device001",
+    "type": "pulse_oximeter_PPG",
+    "protocol": "MQTT",
+    "topic": "SpO2_Only",
+    "sampling_rate_hz": 1,
+    "unit": {
+      "primary": "%"
+    },
+    "data_format": "float",
+    "precision_digits": 1
+  },
+  "conditions": {
+    "normal": {
+      "label": "Normal",
+      "description": "Normal oxygen saturation in healthy adults",
+      "range": [95.0, 100.0],
+      "alert_level": "none"
+    },
+    "acceptable_low": {
+      "label": "Acceptable Low",
+      "description": "Acceptable low SpO2 - warrants monitoring",
+      "range": [92.0, 94.9],
+      "alert_level": "low"
+    },
+    "hypoxemia_mild": {
+      "label": "Mild Hypoxemia",
+      "description": "Mild hypoxemia - clinical intervention often needed",
+      "range": [88.0, 91.9],
+      "alert_level": "medium"
+    },
+    "hypoxemia_moderate": {
+      "label": "Moderate Hypoxemia",
+      "description": "Moderate hypoxemia - supplemental oxygen required",
+      "range": [80.0, 87.9],
+      "alert_level": "high"
+    },
+    "hypoxemia_severe": {
+      "label": "Severe Hypoxemia",
+      "description": "Severe/critical hypoxemia - immediate intervention needed",
+      "range": [50.0, 79.9],
+      "alert_level": "critical"
+    }
+  },
+  "drift_model": {
+    "motion_artifact": {
+      "description": "Simulates motion artifact or sensor displacement",
+      "params": {
+        "probability": 0.10,
+        "drop_percent": [1.0, 4.0]
+      }
+    },
+    "signal_drop": {
+      "description": "Progressive signal loss or probe loosening",
+      "params": {
+        "rate_percent_per_sample": 0.5,
+        "max_drop_percent": 8.0
+      }
+    }
+  }
+}
