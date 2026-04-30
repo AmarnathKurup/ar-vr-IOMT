@@ -52,19 +52,19 @@ def export_temp_csv():
 
     return send_file("temp_data.csv", as_attachment=True)
 
-@app.route('/api/v1/export/sensor/csv', methods=['GET'])
-def export_sensor_csv():
-    if not sensor_store:
+@app.route('/api/v1/export/max30100/csv', methods=['GET'])
+def export_max30100_csv():
+    if not max30100_store:
         return jsonify({"error": "No data"}), 400
 
-    keys = sensor_store[0].keys()
+    keys = max30100_store[0].keys()
 
-    with open("sensor_data.csv", "w", newline='') as f:
+    with open("max30100_data.csv", "w", newline='') as f:
         writer = csv.DictWriter(f, fieldnames=keys) 
         writer.writeheader()
-        writer.writerows(sensor_store)
+        writer.writerows(max30100_store)
 
-    return send_file("sensor_data.csv", as_attachment=True)
+    return send_file("max30100_data.csv", as_attachment=True)
 
 # ===============================
 # 3. TEMPERATURE API
