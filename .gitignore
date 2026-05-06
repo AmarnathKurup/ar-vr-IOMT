@@ -18,3 +18,5 @@ UserSettings/
 # OS files
 Thumbs.db
 .DS_Store
+
+echo Unityprojects/ >> .gitignore
