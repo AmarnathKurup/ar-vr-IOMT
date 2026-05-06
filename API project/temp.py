@@ -1,26 +1,36 @@
-import requests, random, time
+import sys
+from pathlib import Path
+import requests
+import time
+
+# Add simulator folder path
+sys.path.append(str(Path(__file__).resolve().parent.parent / "simulator"))
+
+from HRgen import generate_max30100_data
 
 POST_URL = "http://127.0.0.1:5000/api/v1/temp"
 GET_URL = "http://127.0.0.1:5000/api/v1/temp/latest"
 
-try:
-    while True:
-        # 🔹 Generate temperature
-        temp = {
-            "temperature": round(random.uniform(36, 39), 1)
-        }
+while True:
 
-        # 🔹 POST request
-        post_res = requests.post(POST_URL, json=temp)
-        print("🌡️ Temp POST:", post_res.json())
+    temp_data = generate_max30100_data("1")
 
-        # 🔹 GET request
-        get_res = requests.get(GET_URL)
-        latest = get_res.json()
+    payload = {
+        "temperature":
+            temp_data["telemetry"]["temperature"]["value"],
 
-        print("📥 Latest Temp Data:", latest)
+        "temp_condition":
+            temp_data["condition"]["temp_status"]["label"]
+    }
 
-        time.sleep(2)
+    # POST
+    post_res = requests.post(POST_URL, json=payload)
 
-except KeyboardInterrupt:
-    print("Stopped generating temperature data")
+    print("POST:", post_res.text)
+
+    # GET
+    get_res = requests.get(GET_URL)
+
+    print("GET:", get_res.text)
+
+    time.sleep(1)

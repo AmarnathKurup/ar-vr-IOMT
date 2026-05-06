@@ -1,37 +1,40 @@
-import requests, time
-from HRgen import *
+import sys
+from pathlib import Path
+import requests
+import time
+
+# Add simulator folder path
+sys.path.append(str(Path(__file__).resolve().parent.parent / "simulator"))
+
+from HRgen import generate_max30100_data
 
 POST_URL = "http://127.0.0.1:5000/api/v1/max30100"
 GET_URL = "http://127.0.0.1:5000/api/v1/max30100/latest"
 
-try:
-    while True:
-        # 🔹 Generate sensor data
-        # sensor = {
-        #     "heart_rate": random.randint(60, 130),
-        #     "spo2": random.randint(85, 100)
-        # }
-        max30100 = generate_max30100_data()
+while True:
 
+    max30100 = generate_max30100_data("2")
 
-        # 🔹 POST request
-        post_res = requests.post(POST_URL, json=max30100)
-        print("📡 max30100 POST:", post_res.json())
+    sensor_data = {
+    "heart_rate": max30100["telemetry"]["heart_rate"]["value"],
 
-        # 🔹 GET request (latest data)
-        get_res = requests.get(GET_URL)
-        latest = get_res.json()
+    "spo2": max30100["telemetry"]["spo2"]["value"],
 
-        print("📥 Latest max30100 Data:", latest)
+    "heart_condition":
+        max30100["condition"]["Heart_status"]["label"],
 
-        time.sleep(2)
+    "spo2_condition":
+        max30100["condition"]["spo2_status"]["label"]
+}
 
-except KeyboardInterrupt:
-    print("Stopped generating max30100 data")
+    # POST
+    post_res = requests.post(POST_URL, json=sensor_data)
 
+    print("POST:", post_res.text)
 
+    # GET
+    get_res = requests.get(GET_URL)
 
-    #need to create the get api here  for sensor as well as for the temperature
-    #this file contains  both the heartbeat and the spO2 
+    print("GET:", get_res.text)
 
-    #the next step will  be the api will be given to the ai model to predict it
+    time.sleep(1)

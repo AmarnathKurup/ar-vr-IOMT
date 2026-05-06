@@ -10,6 +10,8 @@ CORS(app)
 # EXPORT COMBINED DATA (IMPORTANT)
 # ===============================
 
+#JSON Export
+
 @app.route('/api/v1/export/combined/json', methods=['GET'])
 def export_combined_json():
     if not combined_store:
@@ -21,7 +23,28 @@ def export_combined_json():
     return send_file("combined_data.json", as_attachment=True)
 
 
+@app.route('/api/v1/export/max30100/json', methods=['GET'])
+def export_max30100_json():
+    if not max30100_store:
+        return jsonify({"error": "No data"}), 400
 
+    with open("max30100_data.json", "w") as f:
+        json.dump(max30100_store, f, indent=4)
+
+    return send_file("max30100_data.json", as_attachment=True)
+
+@app.route('/api/v1/export/temp/json', methods=['GET'])
+def export_temp_json():
+    if not temp_store:
+        return jsonify({"error": "No data"}), 400
+
+    with open("temp_data.json", "w") as f:
+        json.dump(temp_store, f, indent=4)
+
+    return send_file("temp_data.json", as_attachment=True)
+
+
+# CSV Export
 
 @app.route('/api/v1/export/combined/csv', methods=['GET'])
 def export_combined_csv():
@@ -115,7 +138,7 @@ def get_all_max30100():
     return jsonify(max30100_store)
 
 # ===============================
-# 5. COMBINED API (🔥 IMPORTANT)
+# 5. COMBINED API
 # ===============================
 combined_store = []
 
