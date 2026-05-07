@@ -116,10 +116,9 @@ def run_body_temperature(stop_event: threading.Event) -> None:
                 }
             },
             "condition": {
-                "temp_status": {
-                    "label": temp_label
-                }
-            },
+                "temperature": temp_label
+                
+            }
         }
         print(f"[Body Temperature] {json.dumps(payload)}")
 
@@ -192,8 +191,8 @@ def run_max30100(stop_event: threading.Event) -> None:
                 },
             },
             "condition": {
-                "spo2_status":  {"label": spo2_cond["label"]},
-                "Heart_status": {"label": heart_cond["label"]},
+                "spo2":   spo2_cond["label"],
+                "heart_rate": heart_cond["label"]
             },
         }
         print(f"[MAX30100] {json.dumps(payload)}")

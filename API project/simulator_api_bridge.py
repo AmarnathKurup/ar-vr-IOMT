@@ -32,7 +32,7 @@ while True:
                 combined["temperature"]["telemetry"]["temperature"]["value"],
 
             "temp_condition":
-                combined["temperature"]["condition"]["temp_status"]["label"]
+                combined["temperature"]["condition"]["temperature"]
         }
 
         temp_res = requests.post(
@@ -54,10 +54,10 @@ while True:
                 combined["sensor"]["telemetry"]["spo2"]["value"],
 
             "heart_condition":
-                combined["sensor"]["condition"]["Heart_status"]["label"],
+                combined["sensor"]["condition"]["heart_rate"],
 
             "spo2_condition":
-                combined["sensor"]["condition"]["spo2_status"]["label"]
+                combined["sensor"]["condition"]["spo2"]
         }
 
         sensor_res = requests.post(
