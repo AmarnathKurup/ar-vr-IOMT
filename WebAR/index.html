@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Medical WebAR Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ===== Reset & Base ===== */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg-deep: #030814;
+  --bg-mid: #060f24;
+  --bg-soft: #0b1730;
+  --panel-bg: rgba(10, 22, 45, 0.55);
+  --panel-border: rgba(0, 200, 255, 0.18);
+  --cyan: #00d9ff;
+  --cyan-soft: #4ee3ff;
+  --cyan-glow: rgba(0, 217, 255, 0.55);
+  --text-primary: #ffffff;
+  --text-muted: #b6c6dc;
+  --blue-grad: linear-gradient(135deg, #1f7bff 0%, #2e6cff 45%, #1d4ed8 100%);
+  --purple-grad: linear-gradient(135deg, #6c4cff 0%, #7c3aed 45%, #5b21b6 100%);
+  --shadow-cyan: 0 0 30px rgba(0, 217, 255, 0.25);
+  --shadow-blue: 0 10px 30px rgba(31, 123, 255, 0.45);
+  --shadow-purple: 0 10px 30px rgba(124, 58, 237, 0.45);
+}
+
+html, body {
+  min-height: 100%;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: 'Rajdhani', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  position: relative;
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 800px at 20% 0%, rgba(0, 130, 200, 0.18) 0%, transparent 60%),
+    radial-gradient(1200px 800px at 80% 100%, rgba(80, 0, 200, 0.18) 0%, transparent 60%),
+    linear-gradient(180deg, #02060f 0%, #060f24 50%, #03070f 100%);
+  padding: 28px 18px 40px;
+}
+
+/* ===== Decorative background grid & hex pattern ===== */
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(0, 217, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 217, 255, 0.045) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+}
+
+.bg-hex {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.35;
+}
+
+.bg-hex .hex {
+  position: absolute;
+  width: 90px;
+  height: 100px;
+  border: 1px solid rgba(0, 217, 255, 0.18);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  animation: floatHex 14s ease-in-out infinite;
+}
+.bg-hex .hex.h1 { top: 6%;  left: 4%;  animation-delay: 0s; }
+.bg-hex .hex.h2 { top: 18%; right: 6%; width: 70px; height: 80px; animation-delay: -3s; }
+.bg-hex .hex.h3 { top: 8%;  right: 12%; width: 50px; height: 56px; animation-delay: -6s; }
+.bg-hex .hex.h4 { top: 2%;  left: 14%; width: 40px; height: 46px; animation-delay: -9s; }
+
+@keyframes floatHex {
+  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.45; }
+  50% { transform: translateY(-12px) rotate(6deg); opacity: 0.8; }
+}
+
+/* ===== Particles ===== */
+#particles {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+#particles canvas { display: block; width: 100%; height: 100%; }
+
+/* ===== Container ===== */
+.shell {
+  position: relative;
+  z-index: 2;
+  max-width: 1080px;
+  margin: 0 auto;
+  border-radius: 28px;
+  padding: 36px 26px 28px;
+  background:
+    radial-gradient(800px 400px at 50% -10%, rgba(0, 180, 255, 0.10) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(8, 18, 38, 0.7) 0%, rgba(5, 12, 26, 0.85) 100%);
+  border: 1px solid rgba(0, 200, 255, 0.14);
+  box-shadow:
+    inset 0 0 1px rgba(255, 255, 255, 0.05),
+    0 30px 80px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* ===== Hero / Header ===== */
+.hero {
+  position: relative;
+  text-align: center;
+  padding: 18px 10px 28px;
+  opacity: 0;
+  transform: translateY(14px);
+  animation: fadeUp 0.9s ease 0.05s forwards;
+}
+
+.logo-wrap {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  margin: 0 auto 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 45%, rgba(0, 217, 255, 0.20) 0%, rgba(0, 217, 255, 0.05) 50%, transparent 70%);
+}
+
+.logo-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 217, 255, 0.55);
+  box-shadow:
+    0 0 24px rgba(0, 217, 255, 0.55),
+    inset 0 0 18px rgba(0, 217, 255, 0.25);
+  animation: ringPulse 2.6s ease-in-out infinite;
+}
+
+@keyframes ringPulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(0, 217, 255, 0.4), inset 0 0 16px rgba(0, 217, 255, 0.2); }
+  50% { box-shadow: 0 0 36px rgba(0, 217, 255, 0.8), inset 0 0 24px rgba(0, 217, 255, 0.35); }
+}
+
+.logo-cross {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  filter: drop-shadow(0 0 10px rgba(0, 217, 255, 0.7));
+}
+
+.title-main {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: clamp(1.9rem, 5.2vw, 3.2rem);
+  letter-spacing: 1.5px;
+  line-height: 1;
+  margin-top: 6px;
+  color: #fff;
+  text-shadow: 0 2px 18px rgba(0, 180, 255, 0.25);
+}
+
+.title-sub {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.3rem, 3.6vw, 2rem);
+  letter-spacing: 6px;
+  margin-top: 10px;
+  background: linear-gradient(90deg, #00b8ff 0%, #00e6ff 50%, #00b8ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 14px rgba(0, 217, 255, 0.45));
+}
+
+.tagline {
+  margin-top: 22px;
+  font-size: clamp(0.95rem, 1.8vw, 1.1rem);
+  color: var(--text-muted);
+  letter-spacing: 0.4px;
+  font-weight: 500;
+}
+
+/* ===== ECG decoration ===== */
+.ecg {
+  position: absolute;
+  top: 56%;
+  width: 28%;
+  max-width: 260px;
+  height: 60px;
+  opacity: 0.85;
+  pointer-events: none;
+}
+.ecg.left { left: 1%; }
+.ecg.right { right: 1%; transform: scaleX(-1); }
+
+.ecg svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.ecg .ecg-path {
+  fill: none;
+  stroke: var(--cyan);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 6px rgba(0, 217, 255, 0.85));
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  animation: ecgDraw 2.6s linear infinite;
+}
+
+@keyframes ecgDraw {
+  0%   { stroke-dashoffset: 600; }
+  60%  { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -600; }
+}
+
+/* Wave / horizon under hero */
+.hero-wave {
+  position: relative;
+  height: 70px;
+  margin: 18px auto 0;
+  max-width: 720px;
+  opacity: 0.55;
+}
+.hero-wave svg { width: 100%; height: 100%; }
+
+/* ===== Features panel ===== */
+.features {
+  margin-top: 14px;
+  position: relative;
+  border-radius: 22px;
+  padding: 22px 24px;
+  background: linear-gradient(180deg, rgba(10, 24, 50, 0.55) 0%, rgba(6, 16, 34, 0.55) 100%);
+  border: 1px solid var(--panel-border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    0 0 0 1px rgba(0, 217, 255, 0.05),
+    0 20px 50px rgba(0, 0, 0, 0.4),
+    inset 0 0 30px rgba(0, 217, 255, 0.04);
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 0.9s ease 0.25s forwards;
+}
+
+/* subtle inner glow border accent */
+.features::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(0, 217, 255, 0.35), rgba(0, 217, 255, 0) 35%, rgba(0, 217, 255, 0) 65%, rgba(0, 217, 255, 0.28));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+}
+
+.feature-row {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 18px 6px;
+  border-bottom: 1px solid rgba(0, 217, 255, 0.08);
+  opacity: 0;
+  transform: translateX(-12px);
+  animation: slideIn 0.6s ease forwards;
+}
+.feature-row:last-child { border-bottom: 0; }
+
+.feature-row:nth-child(1) { animation-delay: 0.45s; }
+.feature-row:nth-child(2) { animation-delay: 0.55s; }
+.feature-row:nth-child(3) { animation-delay: 0.65s; }
+.feature-row:nth-child(4) { animation-delay: 0.75s; }
+
+.feature-icon {
+  flex: 0 0 auto;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid rgba(0, 217, 255, 0.55);
+  background: radial-gradient(circle at 50% 50%, rgba(0, 217, 255, 0.12) 0%, rgba(0, 217, 255, 0.04) 60%, transparent 75%);
+  box-shadow:
+    0 0 20px rgba(0, 217, 255, 0.25),
+    inset 0 0 14px rgba(0, 217, 255, 0.12);
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.feature-row:hover .feature-icon {
+  transform: scale(1.06) rotate(-2deg);
+  box-shadow:
+    0 0 30px rgba(0, 217, 255, 0.5),
+    inset 0 0 20px rgba(0, 217, 255, 0.2);
+}
+
+.feature-icon svg {
+  width: 34px;
+  height: 34px;
+  fill: none;
+  stroke: var(--cyan-soft);
+  stroke-width: 1.8;
+  filter: drop-shadow(0 0 6px rgba(0, 217, 255, 0.55));
+}
+.feature-icon svg.filled { fill: var(--cyan-soft); stroke: var(--cyan-soft); }
+
+.feature-text { flex: 1 1 auto; min-width: 0; }
+.feature-title {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: clamp(0.95rem, 1.8vw, 1.15rem);
+  letter-spacing: 2px;
+  color: var(--cyan);
+  text-shadow: 0 0 12px rgba(0, 217, 255, 0.35);
+  margin-bottom: 4px;
+}
+.feature-desc {
+  font-size: clamp(0.92rem, 1.5vw, 1.02rem);
+  color: var(--text-muted);
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+/* ===== CTA Buttons ===== */
+.cta-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-top: 22px;
+  opacity: 0;
+  transform: translateY(18px);
+  animation: fadeUp 0.9s ease 0.9s forwards;
+}
+
+.cta {
+  position: relative;
+  border: none;
+  outline: none;
+  border-radius: 18px;
+  padding: 20px 22px;
+  cursor: pointer;
+  color: #fff;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: clamp(1rem, 1.8vw, 1.18rem);
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  text-align: left;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 50%);
+}
+
+.cta::after {
+  content: "";
+  position: absolute;
+  top: 0; left: -120%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.28) 50%, rgba(255, 255, 255, 0) 100%);
+  transform: skewX(-20deg);
+  transition: left 0.7s ease;
+  pointer-events: none;
+}
+
+.cta:hover::after { left: 130%; }
+
+.cta-sensor      { background: var(--blue-grad);   box-shadow: var(--shadow-blue); }
+.cta-temperature { background: var(--purple-grad); box-shadow: var(--shadow-purple); }
+
+.cta:hover {
+  transform: translateY(-3px) scale(1.025);
+  filter: brightness(1.08);
+}
+.cta-sensor:hover      { box-shadow: 0 18px 40px rgba(31, 123, 255, 0.6), 0 0 24px rgba(31, 123, 255, 0.45); }
+.cta-temperature:hover { box-shadow: 0 18px 40px rgba(124, 58, 237, 0.6), 0 0 24px rgba(124, 58, 237, 0.45); }
+.cta:active { transform: translateY(-1px) scale(1.0); }
+.cta:focus-visible { outline: 2px solid rgba(255,255,255,0.7); outline-offset: 3px; }
+
+.cta-icon {
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+}
+.cta-icon svg {
+  width: 38px;
+  height: 38px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.8;
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
+}
+
+.cta-label { flex: 1 1 auto; line-height: 1.15; }
+.cta-arrow {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.12);
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+.cta:hover .cta-arrow {
+  transform: translateX(4px);
+  background: rgba(255, 255, 255, 0.22);
+}
+.cta-arrow svg { width: 16px; height: 16px; fill: none; stroke: #fff; stroke-width: 2.2; }
+
+/* ===== Animations ===== */
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideIn {
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 760px) {
+  body { padding: 16px 10px 28px; }
+  .shell { padding: 24px 16px 20px; border-radius: 22px; }
+  .ecg { width: 22%; height: 44px; top: 50%; }
+  .title-sub { letter-spacing: 4px; }
+  .feature-row { gap: 14px; padding: 14px 2px; }
+  .feature-icon { width: 56px; height: 56px; }
+  .feature-icon svg { width: 28px; height: 28px; }
+  .cta-row { grid-template-columns: 1fr; gap: 14px; }
+  .cta { padding: 16px 18px; }
+}
+
+@media (max-width: 420px) {
+  .ecg { display: none; }
+  .title-main { letter-spacing: 1px; }
+  .feature-title { letter-spacing: 1.4px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- Background layers -->
+<div class="bg-grid" aria-hidden="true"></div>
+<div class="bg-hex" aria-hidden="true">
+  <div class="hex h1"></div>
+  <div class="hex h2"></div>
+  <div class="hex h3"></div>
+  <div class="hex h4"></div>
+</div>
+<div id="particles" aria-hidden="true"><canvas id="particle-canvas"></canvas></div>
+
+<main class="shell" role="main">
+
+  <!-- ===== Hero ===== -->
+  <header class="hero">
+    <!-- ECG lines -->
+    <div class="ecg left" aria-hidden="true">
+      <svg viewBox="0 0 300 60" preserveAspectRatio="none">
+        <path class="ecg-path" d="M0,30 L40,30 L55,30 L65,10 L75,50 L85,30 L120,30 L135,30 L145,5 L155,55 L165,30 L210,30 L225,30 L235,18 L245,42 L255,30 L300,30" />
+      </svg>
+    </div>
+    <div class="ecg right" aria-hidden="true">
+      <svg viewBox="0 0 300 60" preserveAspectRatio="none">
+        <path class="ecg-path" d="M0,30 L40,30 L55,30 L65,10 L75,50 L85,30 L120,30 L135,30 L145,5 L155,55 L165,30 L210,30 L225,30 L235,18 L245,42 L255,30 L300,30" />
+      </svg>
+    </div>
+
+    <!-- Logo -->
+    <div class="logo-wrap" aria-hidden="true">
+      <div class="logo-ring"></div>
+      <svg class="logo-cross" viewBox="0 0 64 64">
+        <defs>
+          <linearGradient id="crossGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#00e6ff"/>
+            <stop offset="100%" stop-color="#0086c2"/>
+          </linearGradient>
+        </defs>
+        <!-- Plus / cross -->
+        <path d="M24,6 H40 V24 H58 V40 H40 V58 H24 V40 H6 V24 H24 Z"
+              fill="url(#crossGrad)" stroke="#9bf2ff" stroke-width="1.2" stroke-linejoin="round"/>
+        <!-- ECG line across -->
+        <path d="M10,32 L22,32 L26,24 L30,40 L34,18 L38,46 L42,32 L54,32"
+              fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <h1 class="title-main">MEDICAL WEBAR</h1>
+    <div class="title-sub">DASHBOARD</div>
+    <p class="tagline">Real-time Health Monitoring<br/>with Augmented Reality</p>
+
+    <!-- Wave horizon -->
+    <div class="hero-wave" aria-hidden="true">
+      <svg viewBox="0 0 720 70" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="waveGrad" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%"  stop-color="rgba(0,217,255,0)"/>
+            <stop offset="50%" stop-color="rgba(0,217,255,0.6)"/>
+            <stop offset="100%" stop-color="rgba(0,217,255,0)"/>
+          </linearGradient>
+        </defs>
+        <path d="M0,50 Q180,10 360,40 T720,30" fill="none" stroke="url(#waveGrad)" stroke-width="1.2"/>
+        <path d="M0,58 Q180,22 360,48 T720,38" fill="none" stroke="url(#waveGrad)" stroke-width="1"/>
+        <path d="M0,66 Q180,32 360,56 T720,46" fill="none" stroke="url(#waveGrad)" stroke-width="0.8"/>
+      </svg>
+    </div>
+  </header>
+
+  <!-- ===== Features Panel ===== -->
+  <section class="features" aria-label="Features">
+
+    <div class="feature-row">
+      <div class="feature-icon" aria-hidden="true">
+        <!-- AR scan -->
+        <svg viewBox="0 0 48 48">
+          <path d="M6,16 V10 a4,4 0 0 1 4,-4 H16" />
+          <path d="M42,16 V10 a4,4 0 0 0 -4,-4 H32" />
+          <path d="M6,32 V38 a4,4 0 0 0 4,4 H16" />
+          <path d="M42,32 V38 a4,4 0 0 1 -4,4 H32" />
+          <text x="24" y="30" text-anchor="middle"
+                font-family="Orbitron, sans-serif" font-size="13" font-weight="700"
+                fill="#4ee3ff" stroke="none">AR</text>
+        </svg>
+      </div>
+      <div class="feature-text">
+        <h3 class="feature-title">AUGMENTED REALITY</h3>
+        <p class="feature-desc">Scan markers to visualize real-time health data in 3D.</p>
+      </div>
+    </div>
+
+    <div class="feature-row">
+      <div class="feature-icon" aria-hidden="true">
+        <!-- Heart with pulse -->
+        <svg viewBox="0 0 48 48">
+          <path class="filled" d="M24,42 C8,30 4,22 4,15 a8,8 0 0 1 14,-5 l6,6 l6,-6 a8,8 0 0 1 14,5 c0,7 -4,15 -20,27 Z"
+                stroke="#4ee3ff" stroke-width="1.4" stroke-linejoin="round"/>
+          <path d="M8,22 H17 L20,15 L24,29 L28,19 L31,22 H40"
+                fill="none" stroke="#03121f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="feature-text">
+        <h3 class="feature-title">REAL-TIME MONITORING</h3>
+        <p class="feature-desc">Live data streaming from sensors and devices.</p>
+      </div>
+    </div>
+
+    <div class="feature-row">
+      <div class="feature-icon" aria-hidden="true">
+        <!-- Shield with plus -->
+        <svg viewBox="0 0 48 48">
+          <path class="filled" d="M24,4 L42,10 V24 c0,11 -8,18 -18,20 C14,42 6,35 6,24 V10 Z"
+                stroke="#4ee3ff" stroke-width="1.4" stroke-linejoin="round"/>
+          <path d="M20,16 H28 V22 H34 V30 H28 V36 H20 V30 H14 V22 H20 Z"
+                fill="#03121f" stroke="none"/>
+        </svg>
+      </div>
+      <div class="feature-text">
+        <h3 class="feature-title">ACCURATE &amp; RELIABLE</h3>
+        <p class="feature-desc">Accurate readings for better health decisions.</p>
+      </div>
+    </div>
+
+    <div class="feature-row">
+      <div class="feature-icon" aria-hidden="true">
+        <!-- People / community -->
+        <svg viewBox="0 0 48 48">
+          <circle class="filled" cx="24" cy="14" r="6" stroke="#4ee3ff" stroke-width="1.2"/>
+          <circle class="filled" cx="12" cy="18" r="5" stroke="#4ee3ff" stroke-width="1.2"/>
+          <circle class="filled" cx="36" cy="18" r="5" stroke="#4ee3ff" stroke-width="1.2"/>
+          <path class="filled" d="M12,40 c0,-7 5,-12 12,-12 s12,5 12,12 Z"
+                stroke="#4ee3ff" stroke-width="1.2" stroke-linejoin="round"/>
+          <path class="filled" d="M2,40 c0,-6 4,-10 10,-10 c2,0 4,0.5 6,1.5 C14,33 12,36 12,40 Z"
+                stroke="#4ee3ff" stroke-width="1.2" stroke-linejoin="round"/>
+          <path class="filled" d="M46,40 c0,-6 -4,-10 -10,-10 c-2,0 -4,0.5 -6,1.5 C34,33 36,36 36,40 Z"
+                stroke="#4ee3ff" stroke-width="1.2" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="feature-text">
+        <h3 class="feature-title">SMART HEALTHCARE</h3>
+        <p class="feature-desc">Empowering healthcare with technology and innovation.</p>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ===== CTA Buttons ===== -->
+  <div class="cta-row">
+    <button class="cta cta-sensor" onclick="openSensor()" aria-label="Open Sensor Dashboard">
+      <span class="cta-icon" aria-hidden="true">
+        <!-- Heart pulse -->
+        <svg viewBox="0 0 48 48">
+          <path d="M24,42 C8,30 4,22 4,15 a8,8 0 0 1 14,-5 l6,6 l6,-6 a8,8 0 0 1 14,5 c0,7 -4,15 -20,27 Z"
+                stroke-linejoin="round"/>
+          <path d="M8,22 H17 L20,15 L24,30 L28,18 L31,22 H40" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="cta-label">Sensor<br/>Dashboard</span>
+      <span class="cta-arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><polyline points="8,5 16,12 8,19" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+    </button>
+
+    <button class="cta cta-temperature" onclick="openTemperature()" aria-label="Open Temperature Dashboard">
+      <span class="cta-icon" aria-hidden="true">
+        <!-- Thermometer -->
+        <svg viewBox="0 0 48 48">
+          <path d="M24,6 a5,5 0 0 1 5,5 V28 a8,8 0 1 1 -10,0 V11 a5,5 0 0 1 5,-5 Z" stroke-linejoin="round"/>
+          <line x1="24" y1="12" x2="24" y2="32" stroke-linecap="round"/>
+          <line x1="29" y1="14" x2="32" y2="14" stroke-linecap="round"/>
+          <line x1="29" y1="20" x2="32" y2="20" stroke-linecap="round"/>
+          <line x1="29" y1="26" x2="32" y2="26" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="cta-label">Temperature<br/>Dashboard</span>
+      <span class="cta-arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><polyline points="8,5 16,12 8,19" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+    </button>
+  </div>
+
+</main>
+
+<script>
+  /* ===== Navigation handlers ===== */
+  function openSensor() {
+    window.location.href = "sensor.html";
+  }
+  function openTemperature() {
+    window.location.href = "temp.html";
+  }
+
+  /* ===== Floating particle background ===== */
+  (function initParticles() {
+    const canvas = document.getElementById('particle-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let width = 0, height = 0, dpr = Math.max(1, window.devicePixelRatio || 1);
+
+    function resize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width  = Math.floor(width  * dpr);
+      canvas.height = Math.floor(height * dpr);
+      canvas.style.width  = width + 'px';
+      canvas.style.height = height + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const target = Math.max(28, Math.min(80, Math.floor((width * height) / 22000)));
+      particles = [];
+      for (let i = 0; i < target; i++) particles.push(makeParticle());
+    }
+
+    function makeParticle() {
+      const r = Math.random() * 1.8 + 0.4;
+      return {
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: r,
+        vx: (Math.random() - 0.5) * 0.25,
+        vy: -Math.random() * 0.35 - 0.05,
+        a: Math.random() * 0.5 + 0.25,
+        tw: Math.random() * Math.PI * 2
+      };
+    }
+
+    function step() {
+      ctx.clearRect(0, 0, width, height);
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.tw += 0.03;
+
+        if (p.y < -10) { p.y = height + 10; p.x = Math.random() * width; }
+        if (p.x < -10) p.x = width + 10;
+        if (p.x > width + 10) p.x = -10;
+
+        const flicker = 0.65 + Math.sin(p.tw) * 0.35;
+        const alpha = p.a * flicker;
+
+        // glow
+        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 6);
+        grad.addColorStop(0, 'rgba(0, 217, 255, ' + alpha + ')');
+        grad.addColorStop(1, 'rgba(0, 217, 255, 0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r * 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // core
+        ctx.fillStyle = 'rgba(180, 240, 255, ' + Math.min(1, alpha + 0.25) + ')';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      requestAnimationFrame(step);
+    }
+
+    window.addEventListener('resize', resize, { passive: true });
+    resize();
+    requestAnimationFrame(step);
+  })();
+</script>
+
+</body>
+</html>

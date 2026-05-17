@@ -121,8 +121,7 @@ def run_body_temperature(stop_event: threading.Event) -> None:
             }
         }
         print(f"[Body Temperature] {json.dumps(payload)}")
-
-        return payload
+        time.sleep(sleep_seconds)
 
     print("[Body Temperature] Simulation stopped.")
 
@@ -197,7 +196,7 @@ def run_max30100(stop_event: threading.Event) -> None:
         }
         print(f"[MAX30100] {json.dumps(payload)}")
 
-        return payload
+        time.sleep(sleep_seconds)
 
     print("[MAX30100] Simulation stopped.")
 
@@ -256,10 +255,6 @@ def parse_selection(raw: str) -> list[str]:
             ordered_unique.append(item)
     return ordered_unique
 
-
-# ---------------------------------------------------------------------------
-# Main entry point
-# ---------------------------------------------------------------------------
 
 def generate_max30100_data(sensor_selection: str):
     """
@@ -326,6 +321,109 @@ def main() -> None:
     raw = input("Enter choice (1/2/3 or comma-separated like 1,2): ")
     generate_max30100_data(raw)
 
+
+# =========================================================
+# SINGLE DATA GENERATORS
+# =========================================================
+
+def generate_temperature_once():
+
+    config = load_config(
+        BODY_TEMP_CONFIG_PATH
+    )
+
+    sensor = config["sensor"]
+
+    conditions = config["conditions"]
+
+    condition = random.choice(
+        list(conditions.values())
+    )
+
+    value = generate_value(
+        condition,
+        int(sensor.get(
+            "precision_digits",
+            1
+        ))
+    )
+
+    return {
+
+        "telemetry": {
+
+            "temperature": {
+
+                "value": value
+            }
+        },
+
+        "condition": {
+
+            "temperature":
+                condition["label"]
+        }
+    }
+
+
+def generate_sensor_once():
+
+    spo2_config = load_config(
+        SPO2_CONFIG_PATH
+    )
+
+    heart_config = load_config(
+        HEART_RATE_CONFIG_PATH
+    )
+
+    spo2_conditions = spo2_config[
+        "conditions"
+    ]
+
+    heart_conditions = heart_config[
+        "conditions"
+    ]
+
+    spo2_cond = random.choice(
+        list(spo2_conditions.values())
+    )
+
+    heart_cond = random.choice(
+        list(heart_conditions.values())
+    )
+
+    return {
+
+        "telemetry": {
+
+            "spo2": {
+
+                "value":
+                    generate_value(
+                        spo2_cond,
+                        1
+                    )
+            },
+
+            "heart_rate": {
+
+                "value":
+                    generate_value(
+                        heart_cond,
+                        1
+                    )
+            }
+        },
+
+        "condition": {
+
+            "spo2":
+                spo2_cond["label"],
+
+            "heart_rate":
+                heart_cond["label"]
+        }
+    }
 
 if __name__ == "__main__":
     main()

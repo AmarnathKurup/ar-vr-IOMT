@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+
+  <!-- A-Frame -->
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+
+  <!-- MindAR -->
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial;
+    }
+
+    /* Main Card */
+    #card {
+      position: relative;
+      width: 320px;
+      height: 550px;
+    }
+
+    /* Background UI */
+    #uiImage {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+    }
+
+    /* Scanner Area */
+    #scanner-frame {
+      position: absolute;
+
+      top: 5px;
+      left: 5px;
+
+      width: 310px;
+      height: 340px;
+
+      overflow: hidden;
+      z-index: 5;
+
+      border-radius: 5px;
+    }
+
+    /* AR Scene */
+    #a-scene-container {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Message */
+    #message {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      width: 100%;
+      text-align: center;
+      color: white;
+      z-index: 20;
+      font-size: 18px;
+      text-shadow: 0 0 10px black;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="card">
+
+    <!-- UI Background -->
+    <img id="uiImage" src="./Images/card.png">
+
+    <!-- Status -->
+    <div id="message">
+      Scan Marker
+    </div>
+
+    <!-- Scanner Window -->
+    <div id="scanner-frame">
+
+      <div id="a-scene-container">
+
+        <a-scene mindar-image="
+            imageTargetSrc: ./targets/Temp_targets.mind;
+            autoStart: true;
+            uiScanning: false;
+            uiLoading: no;
+            filterMinCF: 0.0001;
+            filterBeta: 0.001;
+          " embedded color-space="sRGB" vr-mode-ui="enabled:false" device-orientation-permission-ui="enabled:false"
+          renderer="
+            precision:mediump;
+            antialias:false;
+            physicallyCorrectLights:false;
+          ">
+
+          <!-- ASSETS -->
+          <a-assets>
+
+            <!-- Temperature Dashboard -->
+            <img id="TempDashboard" src="./Images/temperature.png">
+
+
+          </a-assets>
+
+          <!-- Camera -->
+          <a-camera position="0 0 0"></a-camera>
+
+
+
+          <!-- Temperature MARKER -->
+
+          <a-entity id="TempMarker" mindar-image-target="targetIndex:0">
+
+            <a-entity id="TempContainer" position="0 0 0" scale="1 1 1">
+
+              <!-- Dashboard -->
+              <a-plane src="#TempDashboard" position="0 0 0" width="1.5" height="1.5" transparent="true"></a-plane>
+
+              <!-- Temperature -->
+              <a-text id="TempTitle" 
+                value="Patient Temperature" 
+                color="#00ffff" 
+                align="center" 
+                position="0 0.55 0"
+                scale="0.5 0.5 0.5" 
+                shader="msdf"></a-text>
+
+              <!-- TEMPERATURE CONDITION -->
+              <a-text id="TempconditionText" 
+                value="Hypoxemia Moderate" 
+                color="#00ffff" 
+                align="center"
+                position="0.55 0.1 0.01" 
+                scale="0.20 0.20 0.20" 
+                shader="msdf"></a-text>
+
+              <!-- TEMPERATURE -->
+              <a-text id="TempValue" 
+                value="37.0" 
+                color="#00ffff" 
+                align="center" 
+                position="0 0.050 0.01"
+                scale="0.5 0.5 0.5" 
+                shader="msdf"></a-text>
+
+              <!-- TEMPERATURE CONDITION -->
+              <a-text id="TempformulaText" 
+                value="deg C" 
+                color="#00ffff" 
+                align="center"
+                position="0 -0.1 0.01" 
+                scale="0.5 0.5 0.5" 
+                shader="msdf"></a-text>
+
+            </a-entity>
+          </a-entity>
+        </a-scene>
+      </div>
+    </div>
+  </div>
+
+  <script>
+
+    const message =
+      document.querySelector("#message");
+
+
+    /* Temperature MARKER */
+    const TempMarker =
+      document.querySelector("#TempMarker");
+
+    TempMarker.addEventListener(
+      "targetFound",
+      () => {
+
+        /*console.log("TEMPERATURE FOUND");*/
+
+        message.innerHTML =
+          "Temperature Marker Detected";
+
+      }
+    );
+
+    TempMarker.addEventListener(
+      "targetLost",
+      () => {
+
+        /*console.log("TEMPERATURE LOST");*/
+
+        message.innerHTML =
+          "Scan Marker";
+
+      }
+    );
+
+
+/* TEMPERATURE API */
+
+const TEMP_API ="http://localhost:5000/api/v1/temp/latest"; /*Change this to your actual API URL*/
+
+async function fetchTempData(){
+
+  try{
+
+    const response =
+      await fetch(TEMP_API);
+
+    const data =
+      await response.json();
+
+
+    /* TEMPERATURE VALUE */
+
+      document.querySelector("#TempValue")
+      .setAttribute(
+        "value",
+        `${data.temperature.toFixed(1)}`
+      );
+
+    /* CONDITION */
+
+    document
+      .querySelectorAll("#TempconditionText")[0]
+      .setAttribute(
+        "value",
+        data.temp_condition
+      );
+
+  }
+  catch(error){
+
+    console.log(
+      "Temperature API Error:",
+      error
+    );
+
+  }
+
+}
+
+/* INITIAL LOAD */
+fetchTempData();
+
+/* AUTO REFRESH EVERY 1 SECOND */
+setInterval(
+  fetchTempData,
+  1000
+);
+
+    /* DRAG + PAN + ZOOM */
+
+    const TempContainer =
+      document.querySelector("#TempContainer");
+
+
+
+    let activeContainer = null;
+
+    let pos = { x: 0, y: 0 };
+
+    let scale = 1;
+
+    let isDragging = false;
+
+    let startX = 0;
+    let startY = 0;
+
+
+    activeContainer = TempContainer;
+
+    /* TOUCH START */
+
+    window.addEventListener(
+      "touchstart",
+      (e) => {
+
+        if (e.touches.length === 1) {
+
+          isDragging = true;
+
+          startX =
+            e.touches[0].clientX;
+
+          startY =
+            e.touches[0].clientY;
+
+        }
+
+      }
+    );
+
+
+    /* TOUCH MOVE */
+
+    window.addEventListener(
+      "touchmove",
+      (e) => {
+
+        if (!activeContainer) return;
+
+        /* PAN */
+
+        if (
+          isDragging &&
+          e.touches.length === 1
+        ) {
+
+          let dx =
+            (e.touches[0].clientX - startX) * 0.002;
+
+          let dy =
+            (e.touches[0].clientY - startY) * -0.002;
+
+          pos.x += dx;
+          pos.y += dy;
+
+          activeContainer.setAttribute(
+            "position",
+            `${pos.x} ${pos.y} 0`
+          );
+
+          startX =
+            e.touches[0].clientX;
+
+          startY =
+            e.touches[0].clientY;
+        }
+
+        /* PINCH ZOOM */
+
+        if (e.touches.length === 2) {
+
+          const dx =
+            e.touches[0].clientX -
+            e.touches[1].clientX;
+
+          const dy =
+            e.touches[0].clientY -
+            e.touches[1].clientY;
+
+          const distance =
+            Math.sqrt(dx * dx + dy * dy);
+
+          scale = distance / 200;
+
+          if (scale < 0.5)
+            scale = 0.5;
+
+          if (scale > 3)
+            scale = 3;
+
+          activeContainer.setAttribute(
+            "scale",
+            `${scale} ${scale} ${scale}`
+          );
+
+        }
+
+      }
+    );
+
+
+    /* TOUCH END */
+
+    window.addEventListener(
+      "touchend",
+      () => {
+
+        isDragging = false;
+
+      }
+    );
+
+  </script>
+
+</body>
+
+</html>
