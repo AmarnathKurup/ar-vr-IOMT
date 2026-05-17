@@ -37,7 +37,7 @@ _running = False
 # API URLS
 # ==========================================
 
-BASE_API = "http://localhost:5000"  # Change this to your actual API URL
+BASE_API = "http://127.0.0.1:5000"  # Change this to your actual API URL
 
 TEMP_API = f"{BASE_API}/api/v1/temp"
 

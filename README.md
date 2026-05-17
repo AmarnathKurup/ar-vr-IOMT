@@ -67,9 +67,10 @@ Search this line in the project files:
 Changes must be made in:
 
 ```txt
-api project folder /app.py
 api project folder /simulator_api_bridge.py
 simulator folder /app.py
+
+webAR folder /Temp.html and Sensor.html 
 ```
 
 Replace the old IP address with your current IPv4 address.
@@ -353,4 +354,76 @@ Otherwise:
 
 ```txt
 Press CTRL + C in terminal to stop the servers.
+```
+
+```md
+# Simulator Frontend
+
+<p align="center">
+  <img src="WebAR/images/Visuals/simulator frontend.png" width="900">
+</p>
+
+<p align="center">
+  Simulator Frontend Interface
+</p>
+
+---
+
+# Medical WebAR Dashboard
+
+<p align="center">
+  <img src="WebAR/Images/Visuals/AR_dashboard.jpeg" width="350">
+</p>
+
+<p align="center">
+  Medical WebAR Dashboard Home Screen
+</p>
+
+---
+
+# Sensor Marker
+
+<p align="center">
+  <img src="WebAR/Images/sensor_tracker.png" width="350">
+</p>
+
+<p align="center">
+  Sensor Dashboard Marker
+</p>
+
+---
+
+# Temperature Marker
+
+<p align="center">
+  <img src="WebAR/Images/temp_tracker.png" width="350">
+</p>
+
+<p align="center">
+  Temperature Dashboard Marker
+</p>
+
+---
+
+# Sensor Dashboard Augmentation
+
+<p align="center">
+  <img src="WebAR/Images/Visuals/AR_sensor.jpeg" width="350">
+</p>
+
+<p align="center">
+  Sensor Dashboard AR Overlay
+</p>
+
+---
+
+# Temperature Dashboard Augmentation
+
+<p align="center">
+  <img src="WebAR/Images/Visuals/AR_temp.jpeg" width="350">
+</p>
+
+<p align="center">
+  Temperature Dashboard AR Overlay
+</p>
 ```

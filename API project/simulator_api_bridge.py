@@ -9,11 +9,11 @@ sys.path.append(str(Path(__file__).resolve().parent.parent / "simulator"))
 from HRgen import generate_max30100_data
 
 # APIs
-SENSOR_API = "http://localhost:5000/api/v1/max30100" # Change this to your actual API URL
+SENSOR_API = "http://127.0.0.1:5000/api/v1/max30100" # Change this to your actual API URL
 
-TEMP_API = "http://localhost:5000/api/v1/temp" # Change this to your actual API URL
+TEMP_API = "http://127.0.0.1:5000/api/v1/temp" # Change this to your actual API URL
 
-COMBINED_API = "http://localhost:5000/api/v1/combined" # Change this to your actual API URL
+COMBINED_API = "http://127.0.0.1:5000/api/v1/combined" # Change this to your actual API URL
 
 print("Starting realtime simulator...\n")
 
